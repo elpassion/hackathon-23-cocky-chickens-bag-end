@@ -1,6 +1,11 @@
 from fastapi import FastAPI
+from fastapi_sqlalchemy import DBSessionMiddleware
+from fastapi_sqlalchemy import db
+from database import Room, User
 
 app = FastAPI()
+
+app.add_middleware(DBSessionMiddleware, db_url="sqlite://")
 
 
 @app.post("/create")

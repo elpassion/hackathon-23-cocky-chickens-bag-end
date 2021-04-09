@@ -7,6 +7,9 @@ authors = ["Cocky Chickens"]
 [tool.poetry.dependencies]
 python = "^3.8"
 fastapi = "^0.63.0"
+SQLAlchemy = "^1.4.6"
+SQLAlchemy-Utils = "^0.36.8"
+FastAPI-SQLAlchemy = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
