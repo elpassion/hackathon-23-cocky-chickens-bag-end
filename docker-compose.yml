@@ -2,5 +2,10 @@ version: "3.8"
 services:
   api:
     build: .
+    volumes:
+      - "database:/app/_database"
     ports:
-    - "80:80"
+      - "80:80"
+
+volumes:
+  database:
