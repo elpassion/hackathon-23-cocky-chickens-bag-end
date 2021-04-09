@@ -26,6 +26,6 @@ def read_item(room_id):
     }
 
 
-@app.post("/start/{room_id")
+@app.post("/start/{room_id}")
 def start_room(room_id):
     return {"room_id": f"{room_id}"}
