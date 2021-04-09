@@ -1,14 +1,14 @@
-import os
-
 from sqlalchemy import (
     Column,
     Integer,
     String,
     MetaData,
     Table,
+JSON,
     create_engine,
 )
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy_utils import UUIDType
 
 engine = create_engine("sqlite:///database.db")
@@ -22,6 +22,7 @@ class Room(Base):
     __tablename__ = "rooms"
 
     id = Column(UUIDType(binary=False), primary_key=True)
+    users = relationship("User")
 
 
 rooms = Table("rooms", metadata, Column("id", UUIDType(), primary_key=True))
@@ -30,6 +31,8 @@ rooms = Table("rooms", metadata, Column("id", UUIDType(), primary_key=True))
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
+    room_id = Column(Integer. ForeignKey('room_id'))
+    room  = relationship("Room", back_populates="users")
     username = Column(String(100, collation="utf8mb4_unicode_ci"))
     label = Column(String(100, collation="utf8mb4_unicode_ci"))
 
