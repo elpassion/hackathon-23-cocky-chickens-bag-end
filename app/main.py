@@ -38,9 +38,7 @@ def create_user(room_id, username, filename):
 
 def check_label_unique(room_id, label):
     users = User.query.filter_by(room_id=room_id).all()
-    labels = []
-    for user in users:
-        labels.append(user.label)
+    labels = [user.label for user in users]
     return label not in labels
 
 
@@ -68,15 +66,12 @@ def join_room(body: UsernameBody):
 def room_status(room_id):
     room = Room.query.get(room_id)
     if not room:
-        raise HTTPException(status_code=404, detail="No such room. Bye.")
-    players = room.users
-    print(players)
+        raise HTTPException(status_code=404, detail="No such room. Ciao.")
+    users = room.users
     return {
         "room_id": room.id,
         "status": room.status,
-        "players": [
-            {"username": user.username, "label": user.label} for user in players
-        ],
+        "players": [{"username": user.username, "label": user.label} for user in users],
     }
 
 
