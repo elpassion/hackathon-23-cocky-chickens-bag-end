@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy_utils import UUIDType
 
-engine = create_engine("sqlite:///_database/database.db")
+engine = create_engine("sqlite:///_database/database.db", pool_pre_ping=True)
 
 db_session = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -18,14 +18,15 @@ def init_db():
 
 class Room(Model):
     __tablename__ = "rooms"
-    id = Column(UUIDType(binary=False), primary_key=True)
+
+    id = Column(String, primary_key=True)
     users = relationship("User")
 
 
 class User(Model):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    room_id = Column(UUIDType, ForeignKey(Room.id))
+    room_id = Column(String, ForeignKey(Room.id))
     room = relationship(Room, back_populates="users")
     username = Column(String(100))
     label = Column(String(100))
