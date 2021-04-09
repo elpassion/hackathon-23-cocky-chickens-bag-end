@@ -2,10 +2,15 @@ from fastapi import FastAPI
 from fastapi_sqlalchemy import DBSessionMiddleware
 from fastapi_sqlalchemy import db
 from database import Room, User
+from pydantic import BaseModel
 
 app = FastAPI()
 
 app.add_middleware(DBSessionMiddleware, db_url="sqlite:///")
+
+
+class UsernameBody(BaseModel):
+    username: str
 
 
 @app.post("/create")
@@ -13,9 +18,14 @@ def create_room(username):
     return {"username": f"{username}"}
 
 
-@app.get("/join")
-def read_root(username):
-    return {"room_id": "room_id", "username": f"{username}"}
+class JoinRoomResponse(BaseModel):
+    username: str
+    room_id: str
+
+
+@app.get("/join", response_model=JoinRoomResponse)
+def join_room(body: UsernameBody):
+    return {"room_id": "room_id", "username": f"{body: username}"}
 
 
 @app.get("/status/{room_id}")
