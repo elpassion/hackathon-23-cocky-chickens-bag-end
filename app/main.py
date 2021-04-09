@@ -1,8 +1,10 @@
+import database
+from database import init_db
 from fastapi import FastAPI
-from fastapi_sqlalchemy import DBSessionMiddleware
-from fastapi_sqlalchemy import db
-from database import Room, User
+from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
+
+init_db()
 
 app = FastAPI()
 
@@ -44,5 +46,3 @@ def read_item(room_id):
 @app.post("/start/{room_id}")
 def start_room(room_id):
     return {"room_id": f"{room_id}"}
-
-
