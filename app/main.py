@@ -21,7 +21,7 @@ class UsernameBody(BaseModel):
 
 def get_items(filename):
     labels = set()
-    with open(f"labels/{filename}","r" ) as file:
+    with open(f"labels/{filename}", "r") as file:
         for line in file:
             labels.add(line[:-1])
     return list(labels)
@@ -52,9 +52,9 @@ class JoinRoomResponse(BaseModel):
 @app.post("/create", response_model=JoinRoomResponse)
 def create_room(body: UsernameBody):
     room_id = uuid.uuid4().hex
-    create_user(room_id, body.username, filename="animals.txt")
     room = Room(id=room_id)
     db.session.add(room)
+    create_user(room_id, body.username, filename="animals.txt")
 
     return {"username": f"{body.username}", "room_id": f"{room_id}"}
 
