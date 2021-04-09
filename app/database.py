@@ -1,11 +1,13 @@
+import os
+
 from sqlalchemy import (
     Column,
     Integer,
     String,
     MetaData,
     Table,
-JSON,
-    create_engine,
+    JSON,
+    create_engine, ForeignKey,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -31,7 +33,7 @@ rooms = Table("rooms", metadata, Column("id", UUIDType(), primary_key=True))
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    room_id = Column(Integer. ForeignKey('room_id'))
+    room_id = Column(UUIDType, ForeignKey('room.id'))
     room  = relationship("Room", back_populates="users")
     username = Column(String(100, collation="utf8mb4_unicode_ci"))
     label = Column(String(100, collation="utf8mb4_unicode_ci"))
