@@ -1,7 +1,7 @@
 import random
 import uuid
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
 
@@ -27,7 +27,11 @@ def get_items(filename):
     return list(labels)
 
 
-def create_user(room_id, username, filename):
+def create_user(room_id, username, filename, new_room=False):
+    if not (new_room or Room.query.get(room_id)):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No such room. Ciao."
+        )
     unique_label = random.choice(get_items(filename))
     while not check_label_unique(room_id, unique_label):
         continue
@@ -52,21 +56,24 @@ def create_room(body: UsernameBody):
     room_id = uuid.uuid4().hex
     room = Room(id=room_id)
     db.session.add(room)
+    create_user(room_id, body.username, filename="animals.txt", new_room=True)
+
+    return {"username": body.username, "room_id": room_id}
+
+
+@app.post("/join/{room_id}", response_model=JoinRoomResponse)
+def join_room(room_id, body: UsernameBody):
     create_user(room_id, body.username, filename="animals.txt")
-
-    return {"username": f"{body.username}", "room_id": f"{room_id}"}
-
-
-@app.get("/join", response_model=JoinRoomResponse)
-def join_room(body: UsernameBody):
-    return {"room_id": "room_id", "username": f"{body: username}"}
+    return {"room_id": room_id, "username": body.username}
 
 
 @app.get("/status/{room_id}")
 def room_status(room_id):
     room = Room.query.get(room_id)
     if not room:
-        raise HTTPException(status_code=404, detail="No such room. Ciao.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No such room. Ciao."
+        )
     users = room.users
     return {
         "room_id": room.id,
@@ -77,4 +84,12 @@ def room_status(room_id):
 
 @app.post("/start/{room_id}")
 def start_room(room_id):
+    room = Room.query.get(room_id)
+    if room.status != "open":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot start not-open room.",
+        )
+    room.status = "started"
+    db.session.commit()
     return {"room_id": f"{room_id}"}
