@@ -10,8 +10,6 @@ app.add_middleware(DBSessionMiddleware, db_url="sqlite:///")
 
 @app.post("/create")
 def create_room(username):
-    room = Room('')
-    db.session.add()
     return {"username": f"{username}"}
 
 
