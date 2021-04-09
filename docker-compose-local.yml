@@ -2,6 +2,8 @@ version: "3"
 services:
   api:
     build: .
+    depends_on:
+      - postgres
     ports:
       - "8080:80"
     volumes:
@@ -16,6 +18,11 @@ services:
       - "5432:5432"
     env_file:
       - database.env
+    healthcheck:
+      test: [ "CMD", "pgadmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - "database-data:/var/lib/postgresql/data/"
 
