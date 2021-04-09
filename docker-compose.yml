@@ -2,10 +2,19 @@ version: "3.8"
 services:
   api:
     build: .
-    volumes:
-      - "database:/app/_database"
+    env_file:
+      - database.env
     ports:
       - "80:80"
 
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - database.env
+    volumes:
+      - "database-data:/var/lib/postgresql/data/"
+
 volumes:
-  database:
+  database-data:
