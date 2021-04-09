@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import re
 import uuid
 from enum import Enum
 from typing import Dict, List
@@ -50,6 +51,11 @@ class JoinRoomResponse(BaseModel):
     room_id: str
 
 
+def verify_room_id(room_id: str):
+    if not re.match(r"^[a-f0-9]{32}$", room_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=DETAIL_404)
+
+
 def get_items(filename):
     labels = set()
     with open(f"labels/{filename}", "r") as file:
@@ -93,6 +99,7 @@ def create_room(body: UsernameBody):
     responses={404: {"detail": DETAIL_404}},
 )
 def join_room(room_id, body: UsernameBody):
+    verify_room_id(room_id)
     create_user(room_id, body.username, filename="animals.txt")
     return {"room_id": room_id, "username": body.username}
 
@@ -103,6 +110,7 @@ def join_room(room_id, body: UsernameBody):
     responses={404: {"detail": DETAIL_404}},
 )
 def room_status(room_id):
+    verify_room_id(room_id)
     room = Room.query.get(room_id)
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=DETAIL_404)
@@ -123,6 +131,7 @@ def room_status(room_id):
     },
 )
 def start_room(room_id):
+    verify_room_id(room_id)
     room = Room.query.get(room_id)
     if room.status != "open":
         raise HTTPException(
