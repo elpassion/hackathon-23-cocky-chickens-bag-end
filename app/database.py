@@ -1,9 +1,17 @@
+import os
+
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy_utils import UUIDType
 
-engine = create_engine("sqlite:///_database/database.db", pool_pre_ping=True)
+POSTGRES_USER = os.environ["POSTGRES_USER"]
+POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+POSTGRES_DB = os.environ["POSTGRES_DB"]
+POSTGRES_HOST = "postgres"
+DB_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
+
+engine = create_engine(DB_URL)
 
 db_session = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -19,14 +27,15 @@ def init_db():
 class Room(Model):
     __tablename__ = "rooms"
 
-    id = Column(String, primary_key=True)
+    id = Column(UUIDType(binary=False), primary_key=True)
+    status = Column(String(10), default="open")
     users = relationship("User")
 
 
 class User(Model):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    room_id = Column(String, ForeignKey(Room.id))
+    room_id = Column(UUIDType, ForeignKey(Room.id))
     room = relationship(Room, back_populates="users")
     username = Column(String(100))
     label = Column(String(100))

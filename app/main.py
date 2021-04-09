@@ -1,18 +1,18 @@
-import database
 import random
-from database import init_db
-from fastapi import FastAPI
+import uuid
+
+from fastapi import FastAPI, HTTPException
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
-from database import User, Room
+
+from database import DB_URL, Room, User, init_db
 
 init_db()
 
-import uuid
 
 app = FastAPI()
 
-app.add_middleware(DBSessionMiddleware, db_url="sqlite:///_database/database.db")
+app.add_middleware(DBSessionMiddleware, db_url=DB_URL)
 
 
 class UsernameBody(BaseModel):
@@ -50,13 +50,13 @@ class JoinRoomResponse(BaseModel):
 
 
 @app.post("/create", response_model=JoinRoomResponse)
-def create_room(username):
+def create_room(body: UsernameBody):
     room_id = uuid.uuid4().hex
-    create_user(room_id, username, filename="animals.txt")
+    create_user(room_id, body.username, filename="animals.txt")
     room = Room(id=room_id)
     db.session.add(room)
 
-    return {"username": f"{username}", "room_id": f"{room_id}"}
+    return {"username": f"{body.username}", "room_id": f"{room_id}"}
 
 
 @app.get("/join", response_model=JoinRoomResponse)
@@ -65,14 +65,17 @@ def join_room(body: UsernameBody):
 
 
 @app.get("/status/{room_id}")
-def read_item(room_id):
+def room_status(room_id):
+    room = Room.query.get(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="No such room. Bye.")
+    players = room.users
+    print(players)
     return {
-        "room_id": f"{room_id}",
-        "status": "on_air",
+        "room_id": room.id,
+        "status": room.status,
         "players": [
-            {"username": "max", "label": "alpaca"},
-            {"username": "ann", "label": "dog"},
-            {"username": "adam", "label": "bat"},
+            {"username": user.username, "label": user.label} for user in players
         ],
     }
 
