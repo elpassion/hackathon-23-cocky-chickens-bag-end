@@ -133,11 +133,11 @@ def room_status(room_id):
 def start_room(room_id):
     verify_room_id(room_id)
     room = Room.query.get(room_id)
-    if room.status != "open":
+    if room.status != Status.open:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot start not-open room.",
         )
-    room.status = "started"
+    room.status = Status.on_air
     db.session.commit()
     return {"room_id": f"{room_id}"}
