@@ -8,6 +8,8 @@ services:
       - database.env
     ports:
       - "80:80"
+    command: ["wait-for-it", "postgres:5432", "--", "/start.sh"]
+
 
   postgres:
     image: postgres
@@ -15,11 +17,6 @@ services:
       - "5432:5432"
     env_file:
       - database.env
-    healthcheck:
-      test: [ "CMD", "pgadmin" ,"ping", "-h", "localhost" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     volumes:
       - "database-data:/var/lib/postgresql/data/"
 
