@@ -75,9 +75,7 @@ def room_status(room_id):
         "room_id": room.id,
         "status": room.status,
         "players": [
-            {"username": "max", "label": "alpaca"},
-            {"username": "ann", "label": "dog"},
-            {"username": "adam", "label": "bat"},
+            {"username": user.username, "label": user.label} for user in players
         ],
     }
 
