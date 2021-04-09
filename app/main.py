@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import random
 import uuid
+from enum import Enum
+from typing import Dict, List
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi_sqlalchemy import DBSessionMiddleware, db
@@ -7,16 +11,43 @@ from pydantic import BaseModel
 
 from database import DB_URL, Room, User, init_db
 
-init_db()
+DETAIL_404 = "No such room. Ciao."
 
+init_db()
 
 app = FastAPI()
 
 app.add_middleware(DBSessionMiddleware, db_url=DB_URL)
 
 
+class StartRoomResponse(BaseModel):
+    room_id: str
+
+
+class Status(str, Enum):
+    open = "open"
+    on_air = "on_air"
+    closed = "closed"
+
+
+class UserWithLabel(BaseModel):
+    username: str
+    label: str
+
+
+class RoomStatusResponse(BaseModel):
+    room_id: str
+    status: Status
+    players: List[UserWithLabel]
+
+
 class UsernameBody(BaseModel):
     username: str
+
+
+class JoinRoomResponse(BaseModel):
+    username: str
+    room_id: str
 
 
 def get_items(filename):
@@ -46,11 +77,6 @@ def check_label_unique(room_id, label):
     return label not in labels
 
 
-class JoinRoomResponse(BaseModel):
-    username: str
-    room_id: str
-
-
 @app.post("/create", response_model=JoinRoomResponse)
 def create_room(body: UsernameBody):
     room_id = uuid.uuid4().hex
@@ -61,19 +87,25 @@ def create_room(body: UsernameBody):
     return {"username": body.username, "room_id": room_id}
 
 
-@app.post("/join/{room_id}", response_model=JoinRoomResponse)
+@app.post(
+    "/join/{room_id}",
+    response_model=JoinRoomResponse,
+    responses={404: {"detail": DETAIL_404}},
+)
 def join_room(room_id, body: UsernameBody):
     create_user(room_id, body.username, filename="animals.txt")
     return {"room_id": room_id, "username": body.username}
 
 
-@app.get("/status/{room_id}")
+@app.get(
+    "/status/{room_id}",
+    response_model=RoomStatusResponse,
+    responses={404: {"detail": DETAIL_404}},
+)
 def room_status(room_id):
     room = Room.query.get(room_id)
     if not room:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No such room. Ciao."
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=DETAIL_404)
     users = room.users
     return {
         "room_id": room.id,
@@ -82,7 +114,14 @@ def room_status(room_id):
     }
 
 
-@app.post("/start/{room_id}")
+@app.post(
+    "/start/{room_id}",
+    response_model=StartRoomResponse,
+    responses={
+        404: {"detail": DETAIL_404},
+        400: {"detail": "Cannot start not-open room."},
+    },
+)
 def start_room(room_id):
     room = Room.query.get(room_id)
     if room.status != "open":
