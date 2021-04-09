@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import UUIDType
 
-engine = create_engine("sqlite:///database.db")
+engine = create_engine("sqlite:///_database/database.db")
 engine.connect()
 
 Base = declarative_base()
