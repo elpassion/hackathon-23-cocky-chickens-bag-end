@@ -116,7 +116,7 @@ def room_status(room_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=DETAIL_404)
     users = room.users
     return {
-        "room_id": room.id,
+        "room_id": room_id,
         "status": room.status,
         "players": [{"username": user.username, "label": user.label} for user in users],
     }
