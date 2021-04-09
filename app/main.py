@@ -1,7 +1,6 @@
-from fastapi import FastAPI
-from fastapi_sqlalchemy import DBSessionMiddleware
-from fastapi_sqlalchemy import db
 from database import Room, User
+from fastapi import FastAPI
+from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
 
 app = FastAPI()
