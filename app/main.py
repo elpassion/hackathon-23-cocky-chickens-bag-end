@@ -3,8 +3,11 @@ from database import init_db
 from fastapi import FastAPI
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
+from database import User, Room
 
 init_db()
+
+import uuid
 
 app = FastAPI()
 
@@ -15,14 +18,20 @@ class UsernameBody(BaseModel):
     username: str
 
 
-@app.post("/create")
-def create_room(username):
-    return {"username": f"{username}"}
-
-
 class JoinRoomResponse(BaseModel):
     username: str
     room_id: str
+
+
+@app.post("/create", response_model=JoinRoomResponse)
+def create_room(username):
+    room_id = uuid.uuid4().hex
+    # user = User(username=username, room_id=room_id, label="label")
+    room = Room(id=room_id)
+    db.session.add(room)
+    # db.session.add(user)
+    db.session.commit()
+    return {"username": f"{username}"}
 
 
 @app.get("/join", response_model=JoinRoomResponse)

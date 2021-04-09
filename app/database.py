@@ -18,6 +18,7 @@ def init_db():
 
 class Room(Model):
     __tablename__ = "rooms"
+
     id = Column(UUIDType(binary=False), primary_key=True)
     users = relationship("User")
 
