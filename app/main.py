@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 
 from database import DB_URL, Room, User, init_db
+from name_generator import generate_room_name
 
 DETAIL_404 = "No such room. Ciao."
 
@@ -72,7 +73,6 @@ class RoomStatusResponse(BaseModel):
 class CreateRoomBody(BaseModel):
     username: str
     room_category: Categories
-    room_name: str
 
 
 class UsernameBody(BaseModel):
@@ -119,7 +119,7 @@ def check_label_unique(room_id, label):
 @app.post("/create", response_model=JoinRoomResponse)
 def create_room(body: CreateRoomBody):
     room_id = uuid.uuid4().hex
-    room = Room(id=room_id, name=body.room_name, room_category=body.room_category)
+    room = Room(id=room_id, name=generate_room_name(), room_category=body.room_category)
     db.session.add(room)
     db.session.commit()
     create_user(room_id, body.username, filename="animals.txt", new_room=True)
