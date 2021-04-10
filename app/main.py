@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List
 
@@ -129,7 +129,13 @@ def room_status(room_id):
     room = Room.query.get(room_id)
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=DETAIL_404)
-    users = room.users
+    now = datetime.utcnow().replace(tzinfo=pytz.utc)
+    room_age = now - room.updated
+    if room_age > timedelta(minutes=60):
+        room.status = Status.closed
+        db.session.add(room)
+        db.session.commit()
+    users = room.users if room.status != Status.closed else []
     return {
         "room_id": room_id,
         "status": room.status,
