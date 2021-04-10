@@ -121,6 +121,7 @@ def create_room(body: CreateRoomBody):
     room_id = uuid.uuid4().hex
     room = Room(id=room_id, name=body.room_name, room_category=body.room_category)
     db.session.add(room)
+    db.session.commit()
     create_user(room_id, body.username, filename="animals.txt", new_room=True)
 
     return {"username": body.username, "room_id": room_id}
@@ -178,6 +179,7 @@ def start_room(room_id):
             detail="Cannot start not-open room.",
         )
     room.status = Status.on_air
+    db.session.add(room)
     db.session.commit()
     return {"room_id": f"{room_id}"}
 
