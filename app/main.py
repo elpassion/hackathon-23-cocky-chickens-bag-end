@@ -24,6 +24,11 @@ app = FastAPI()
 app.add_middleware(DBSessionMiddleware, db_url=DB_URL)
 
 origins = [
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "http://localhost",
+    "https://hackathon-23-cocky-chickens.vercel.app",
+    "http://hackathon-23-cocky-chickens.vercel.app",
     "*",  # YOLO
 ]
 
