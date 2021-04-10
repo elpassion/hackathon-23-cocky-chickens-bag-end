@@ -212,7 +212,6 @@ def start_room(room_id):
             detail="Cannot start not-open room.",
         )
     room.status = Status.on_air
-    db.session.add(room)
     db.session.commit()
     return RoomModel(
         room_id=room.nice_id,
