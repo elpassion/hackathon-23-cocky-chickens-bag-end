@@ -119,7 +119,7 @@ def check_label_unique(room_id, label):
 @app.post("/create", response_model=JoinRoomResponse)
 def create_room(body: CreateRoomBody):
     room_id = uuid.uuid4().hex
-    room = Room(id=room_id, name=generate_room_name(), room_category=body.room_category)
+    room = Room(id=room_id, name=generate_room_name(), category=body.room_category)
     db.session.add(room)
     db.session.commit()
     create_user(room_id, body.username, filename="animals.txt", new_room=True)
