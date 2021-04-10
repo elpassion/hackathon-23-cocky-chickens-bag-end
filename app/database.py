@@ -43,6 +43,10 @@ class Room(Model):
     name = Column(String(100))
     category = Column(String(20))
 
+    @property
+    def nice_id(self):
+        return self.id.hex
+
 
 class User(Model):
     __tablename__ = "users"

@@ -136,7 +136,7 @@ def create_room(body: CreateRoomBody):
 
     return JoinRoomResponse(
         username=body.username,
-        room_id=room_id,
+        room_id=room.nice_id,
         room_name=room.name,
         room_category=room.category,
     )
@@ -153,7 +153,7 @@ def join_room(room_id, body: UsernameBody):
     room = Room.query.get(room_id)
     return JoinRoomResponse(
         username=body.username,
-        room_id=room_id,
+        room_id=room.nice_id,
         room_name=room.name,
         room_category=room.category,
     )
@@ -177,7 +177,7 @@ def room_status(room_id):
         db.session.commit()
     users = room.users if room.status != Status.closed else []
     return RoomStatusResponse(
-        room_id=room_id,
+        room_id=room.nice_id,
         room_category=room.category,
         room_name=room.name,
         status=room.status,
@@ -205,7 +205,7 @@ def start_room(room_id):
     db.session.add(room)
     db.session.commit()
     return RoomModel(
-        room_id=str(room.id),
+        room_id=room.nice_id,
         room_name=room.name,
         room_category=room.category,
         room_status=room.status,
@@ -222,7 +222,7 @@ def list_rooms():
     return {
         "rooms": [
             RoomModel(
-                room_id=str(room.id),
+                room_id=room.nice_id,
                 room_name=room.name,
                 room_category=room.category,
                 room_status=room.status,
