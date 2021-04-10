@@ -1,15 +1,16 @@
-version: "3.8"
+version: "3"
 services:
   api:
     build: .
     depends_on:
       - postgres
-    env_file:
-      - database.env
     ports:
       - "80:80"
-    command: ["wait-for-it", "postgres:5432", "--", "/start.sh"]
-
+    volumes:
+      - "./app:/app"
+    env_file:
+      - database.env
+    command: ["wait-for-it", "postgres:5432", "--", "/start-reload.sh"]
 
   postgres:
     image: postgres
