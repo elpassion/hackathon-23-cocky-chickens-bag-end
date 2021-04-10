@@ -46,6 +46,7 @@ class RoomModel(BaseModel):
     room_id: str
     room_name: str
     room_category: str
+    room_status: str
 
 
 class Status(str, Enum):
@@ -198,7 +199,12 @@ def start_room(room_id):
     room.status = Status.on_air
     db.session.add(room)
     db.session.commit()
-    return {"room_id": f"{room_id}"}
+    return RoomModel(
+        room_id=str(room.id),
+        room_name=room.name,
+        room_category=room.category,
+        room_status=room.status,
+    )
 
 
 class RoomsResponse(BaseModel):
@@ -214,6 +220,7 @@ def list_rooms():
                 room_id=str(room.id),
                 room_name=room.room_name,
                 room_category=room.room_category,
+                room_status=room.status,
             )
             for room in rooms
         ]
