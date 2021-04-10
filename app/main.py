@@ -9,9 +9,9 @@ from typing import Dict, List
 
 import pytz
 from fastapi import FastAPI, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
+from starlette.middleware.cors import CORSMiddleware
 
 from database import DB_URL, Room, User, init_db
 
