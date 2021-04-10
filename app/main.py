@@ -58,6 +58,9 @@ class Status(str, Enum):
 class Categories(str, Enum):
     animals = "animals"
     people = "people"
+    household = "household"
+    plants = "plants"
+    hardcore = "hardcore"
 
 
 class UserWithLabel(BaseModel):
@@ -94,16 +97,24 @@ def verify_room_id(room_id: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=DETAIL_404)
 
 
-def get_items(filename):
+def get_items(category):
     labels = set()
-    with open(f"labels/{filename}", "r") as file:
-        for line in file:
-            labels.add(line[:-1])
+    if category != Categories.hardcore:
+        with open(f"labels/{category}.txt", "r") as file:
+            for line in file:
+                labels.add(line[:-1])
+        return list(labels)
+
+    categories = [e.value for e in Categories if e.value != Categories.hardcore]
+    for category in categories:
+        with open(f"labels/{category}.txt", "r") as file:
+            for line in file:
+                labels.add(line[:-1])
     return list(labels)
 
 
 def get_new_label(category, room_id):
-    unique_label = random.choice(get_items(f"{category}.txt"))
+    unique_label = random.choice(get_items(category))
     while not check_label_unique(room_id, unique_label):
         continue
     return unique_label
@@ -173,7 +184,6 @@ def room_status(room_id):
     room_age = now - room.updated
     if room_age > timedelta(minutes=60):
         room.status = Status.closed
-        db.session.add(room)
         db.session.commit()
     users = room.users if room.status != Status.closed else []
     return RoomStatusResponse(
