@@ -224,7 +224,7 @@ def list_rooms():
             RoomModel(
                 room_id=str(room.id),
                 room_name=room.name,
-                room_category=room.room_category,
+                room_category=room.category,
                 room_status=room.status,
             )
             for room in rooms
