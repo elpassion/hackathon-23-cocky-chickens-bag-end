@@ -43,8 +43,8 @@ app.add_middleware(
 
 class RoomModel(BaseModel):
     room_id: str
-    name: str
-    category: str
+    room_name: str
+    room_category: str
 
 
 class Status(str, Enum):
@@ -71,7 +71,7 @@ class RoomStatusResponse(BaseModel):
 
 class CreateRoomBody(BaseModel):
     username: str
-    category: Categories
+    room_category: Categories
     room_name: str
 
 
@@ -119,7 +119,7 @@ def check_label_unique(room_id, label):
 @app.post("/create", response_model=JoinRoomResponse)
 def create_room(body: CreateRoomBody):
     room_id = uuid.uuid4().hex
-    room = Room(id=room_id, name=body.room_name, category=body.category)
+    room = Room(id=room_id, name=body.room_name, room_category=body.room_category)
     db.session.add(room)
     create_user(room_id, body.username, filename="animals.txt", new_room=True)
 
@@ -191,7 +191,11 @@ def list_rooms():
     rooms = Room.query.filter_by(status=Status.open).all()
     return {
         "rooms": [
-            RoomModel(room_id=str(room.id), name=room.name, category=room.category)
+            RoomModel(
+                room_id=str(room.id),
+                room_name=room.room_name,
+                room_category=room.room_category,
+            )
             for room in rooms
         ]
     }
