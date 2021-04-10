@@ -41,14 +41,21 @@ app.add_middleware(
 )
 
 
-class StartRoomResponse(BaseModel):
+class RoomModel(BaseModel):
     room_id: str
+    name: str
+    category: str
 
 
 class Status(str, Enum):
     open = "open"
     on_air = "on_air"
     closed = "closed"
+
+
+class Categories(str, Enum):
+    animals = "animals"
+    people = "people"
 
 
 class UserWithLabel(BaseModel):
@@ -60,6 +67,12 @@ class RoomStatusResponse(BaseModel):
     room_id: str
     status: Status
     players: List[UserWithLabel]
+
+
+class CreateRoomBody(BaseModel):
+    username: str
+    category: Categories
+    room_name: str
 
 
 class UsernameBody(BaseModel):
@@ -104,9 +117,9 @@ def check_label_unique(room_id, label):
 
 
 @app.post("/create", response_model=JoinRoomResponse)
-def create_room(body: UsernameBody):
+def create_room(body: CreateRoomBody):
     room_id = uuid.uuid4().hex
-    room = Room(id=room_id)
+    room = Room(id=room_id, name=body.room_name, category=body.category)
     db.session.add(room)
     create_user(room_id, body.username, filename="animals.txt", new_room=True)
 
@@ -150,7 +163,7 @@ def room_status(room_id):
 
 @app.post(
     "/start/{room_id}",
-    response_model=StartRoomResponse,
+    response_model=RoomModel,
     responses={
         404: {"detail": DETAIL_404},
         400: {"detail": "Cannot start not-open room."},
@@ -167,3 +180,16 @@ def start_room(room_id):
     room.status = Status.on_air
     db.session.commit()
     return {"room_id": f"{room_id}"}
+
+
+class RoomsResponse(BaseModel):
+    rooms: List[RoomModel]
+
+
+@app.get("/rooms", response_model=RoomsResponse)
+def list_rooms():
+    rooms = Room.query.filter_by(status=Status.open).all()
+    return [
+        RoomModel(room_id=room.id, name=room.name, category=room.category)
+        for room in rooms
+    ]

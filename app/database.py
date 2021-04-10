@@ -42,6 +42,8 @@ class Room(Model):
     updated = Column(
         DateTime(timezone=True), server_default=func.now(), server_onupdate=func.now()
     )
+    name = Column(String(100))
+    category = Column(String(20))
 
 
 class User(Model):
