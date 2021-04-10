@@ -61,13 +61,23 @@ module "http_sg" {
   ingress_cidr_blocks = ["0.0.0.0/0"]
 }
 
+module "https_sg" {
+  source  = "terraform-aws-modules/security-group/aws//modules/https-443"
+  version = "~> 3.18.0"
+
+  name = "chicken-ssh"
+  vpc_id = data.aws_vpc.default.id
+
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+}
+
 resource "aws_instance" "api" {
 
   ami                    = data.aws_ami.ubuntu.id
   subnet_id              = tolist(data.aws_subnet_ids.default.ids)[0]
   instance_type          = "t3.micro"
   key_name               = aws_key_pair.api.key_name
-  vpc_security_group_ids = [module.bastion_sg.this_security_group_id, module.http_sg.this_security_group_id]
+  vpc_security_group_ids = [module.bastion_sg.this_security_group_id, module.http_sg.this_security_group_id, module.https_sg.this_security_group_id]
 
   root_block_device {
     volume_type = "gp2"

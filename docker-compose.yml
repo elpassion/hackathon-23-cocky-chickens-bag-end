@@ -34,8 +34,11 @@ services:
     env_file:
       - database.env
     environment:
-      - VIRTUAL_HOST=api.shiny-infra.xyz
-      - VIRTUAL_PORT=80
+      VIRTUAL_HOST: api.shiny-infra.xyz
+      VIRTUAL_PORT: 80
+      LETSENCRYPT_HOST: api.shiny-infra.xyz
+      LETSENCRYPT_EMAIL: hackathon@dumpsite.xyz
+
     command: ["wait-for-it", "postgres:5432", "--", "/start-reload.sh"]
 
   postgres:
