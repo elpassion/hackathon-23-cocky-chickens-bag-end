@@ -102,14 +102,19 @@ def get_items(filename):
     return list(labels)
 
 
-def create_user(room_id, username, filename, new_room=False):
+def get_new_label(category, room_id):
+    unique_label = random.choice(get_items(f"{category}.txt"))
+    while not check_label_unique(room_id, unique_label):
+        continue
+    return unique_label
+
+
+def create_user(room_id, username, category, new_room=False):
     if not (new_room or Room.query.get(room_id)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No such room. Ciao."
         )
-    unique_label = random.choice(get_items(filename))
-    while not check_label_unique(room_id, unique_label):
-        continue
+    unique_label = get_new_label(category, room_id)
     user = User(username=username, room_id=room_id, label=unique_label)
     db.session.add(user)
     db.session.commit()
@@ -127,7 +132,7 @@ def create_room(body: CreateRoomBody):
     room = Room(id=room_id, name=generate_room_name(), category=body.room_category)
     db.session.add(room)
     db.session.commit()
-    create_user(room_id, body.username, filename="animals.txt", new_room=True)
+    create_user(room_id, body.username, category=room.category, new_room=True)
 
     return JoinRoomResponse(
         username=body.username,
@@ -218,7 +223,7 @@ def list_rooms():
         "rooms": [
             RoomModel(
                 room_id=str(room.id),
-                room_name=room.room_name,
+                room_name=room.name,
                 room_category=room.room_category,
                 room_status=room.status,
             )
