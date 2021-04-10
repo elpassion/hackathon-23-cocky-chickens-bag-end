@@ -66,6 +66,8 @@ class UserWithLabel(BaseModel):
 
 class RoomStatusResponse(BaseModel):
     room_id: str
+    room_name: str
+    room_category: str
     status: Status
     players: List[UserWithLabel]
 
@@ -82,6 +84,8 @@ class UsernameBody(BaseModel):
 class JoinRoomResponse(BaseModel):
     username: str
     room_id: str
+    room_name: str
+    room_category: str
 
 
 def verify_room_id(room_id: str):
@@ -124,7 +128,12 @@ def create_room(body: CreateRoomBody):
     db.session.commit()
     create_user(room_id, body.username, filename="animals.txt", new_room=True)
 
-    return {"username": body.username, "room_id": room_id}
+    return JoinRoomResponse(
+        username=body.username,
+        room_id=room_id,
+        room_name=room.name,
+        room_category=room.category,
+    )
 
 
 @app.post(
@@ -135,7 +144,13 @@ def create_room(body: CreateRoomBody):
 def join_room(room_id, body: UsernameBody):
     verify_room_id(room_id)
     create_user(room_id, body.username, filename="animals.txt")
-    return {"room_id": room_id, "username": body.username}
+    room = Room.query.get(room_id)
+    return JoinRoomResponse(
+        username=body.username,
+        room_id=room_id,
+        room_name=room.name,
+        room_category=room.category,
+    )
 
 
 @app.get(
@@ -155,11 +170,13 @@ def room_status(room_id):
         db.session.add(room)
         db.session.commit()
     users = room.users if room.status != Status.closed else []
-    return {
-        "room_id": room_id,
-        "status": room.status,
-        "players": [{"username": user.username, "label": user.label} for user in users],
-    }
+    return RoomStatusResponse(
+        room_id=room_id,
+        room_category=room.category,
+        room_name=room.name,
+        status=room.status,
+        players=[{"username": user.username, "label": user.label} for user in users],
+    )
 
 
 @app.post(
