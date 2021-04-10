@@ -227,7 +227,7 @@ class RoomsResponse(BaseModel):
 
 @app.get("/rooms", response_model=RoomsResponse)
 def list_rooms():
-    rooms = Room.query.filter_by(status=Status.open).all()
+    rooms = Room.query.filter_by(status=Status.open).order_by(Room.created.desc()).all()
     return {
         "rooms": [
             RoomModel(
