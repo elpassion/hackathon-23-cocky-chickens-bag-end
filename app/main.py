@@ -3,10 +3,13 @@ from __future__ import annotations
 import random
 import re
 import uuid
+from datetime import datetime
 from enum import Enum
 from typing import Dict, List
 
+import pytz
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 from pydantic import BaseModel
 
@@ -19,6 +22,18 @@ init_db()
 app = FastAPI()
 
 app.add_middleware(DBSessionMiddleware, db_url=DB_URL)
+
+origins = [
+    "*",  # YOLO
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class StartRoomResponse(BaseModel):

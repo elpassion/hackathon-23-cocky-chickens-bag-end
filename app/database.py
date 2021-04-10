@@ -1,6 +1,14 @@
 import os
 
-from sqlalchemy import Column, ForeignKey, Integer, String, create_engine, DateTime, func
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    create_engine,
+    func,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, scoped_session, sessionmaker
 from sqlalchemy_utils import UUIDType
@@ -31,6 +39,9 @@ class Room(Model):
     status = Column(String(10), default="open")
     users = relationship("User")
     created = Column(DateTime(timezone=True), server_default=func.now())
+    updated = Column(
+        DateTime(timezone=True), server_default=func.now(), server_onupdate=func.now()
+    )
 
 
 class User(Model):
@@ -40,3 +51,7 @@ class User(Model):
     room = relationship(Room, back_populates="users")
     username = Column(String(100))
     label = Column(String(100))
+    created = Column(DateTime(timezone=True), server_default=func.now())
+    updated = Column(
+        DateTime(timezone=True), server_default=func.now(), server_onupdate=func.now()
+    )
