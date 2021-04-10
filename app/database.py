@@ -21,9 +21,7 @@ DB_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_H
 
 engine = create_engine(DB_URL)
 
-db_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=engine)
-)
+db_session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=engine))
 Model = declarative_base(name="Model")
 Model.query = db_session.query_property()
 
