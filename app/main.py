@@ -149,8 +149,8 @@ def create_room(body: CreateRoomBody):
 )
 def join_room(room_id, body: UsernameBody):
     verify_room_id(room_id)
-    create_user(room_id, body.username, filename="animals.txt")
     room = Room.query.get(room_id)
+    create_user(room_id, body.username, category=room.category)
     return JoinRoomResponse(
         username=body.username,
         room_id=room.nice_id,
